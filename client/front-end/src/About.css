@@ -1,0 +1,134 @@
+.MainContentContainer{
+    text-align: center;
+}
+.MainHeading{
+    font-family: 'Jura';
+    font-style: normal;
+    font-weight: 700;
+    font-size: 6.06rem;
+    text-align: center;
+    text-transform: uppercase;
+    color: #53D5FD;
+    font-feature-settings: 'salt' on, 'liga' off;
+    text-shadow: 0px 0px 1.02rem #53D5FD, 0px 0px 2.46rem #191DD5;
+}
+
+.MainContent{
+    font-family: 'Jura';
+    font-weight: 700;
+    font-style: normal;
+    font-size: 2.1rem;
+    text-align: center;
+    color: #FFFFFF;
+    padding: 4.2rem;
+    padding-top: 0px;
+}
+
+.BoxContainer{
+    display: flex;
+    justify-content: space-evenly;
+}
+.Box{
+    border: 0.12rem solid #53D5FD;
+    box-shadow: 0px 0px 0.72rem 0.18rem #53D5FD, 0rem 0px 2.28rem 0.96rem #191DD5;
+    border-radius: 0.6rem;
+    width: 25.14rem;
+    height: 37.38rem;
+    padding: 1.8rem;
+    background-image: url('./static/Blue\ Neon.png');
+    background-size: cover;
+    display: flex;
+    align-items: center;
+    flex-direction: column;
+}
+.BoxHeading{
+    font-family: 'Jura';
+    font-style: normal;
+    font-weight: 700;
+    font-size: 1.8rem;
+    line-height: 1.92rem;
+    /* or 107% */
+    
+    text-align: center;
+    text-transform: uppercase;
+    font-feature-settings: 'salt' on, 'liga' off;
+    color: #53D5FD;
+    text-shadow: 0px 0px 0.72rem #53D5FD, 0px 0px 2.28rem #191DD5;
+}
+
+.BoxContent{
+    font-family: 'Jura';
+    font-style: normal;
+    font-weight: 700;
+    font-size: 1.98rem;
+
+    /* or 117% */
+
+    text-align: center;
+    font-feature-settings: 'salt' on, 'liga' off;
+
+    color: #FFFFFF;
+}
+.BoxIcon{
+    height: 4.32rem;
+    width: 4.2rem;
+}
+
+
+@media only screen and (max-width: 830px) {
+    html{
+        font-size: 55%;
+    }
+    .Box{
+        border: 0.12rem solid #53D5FD;
+        box-shadow: 0px 0px 0.72rem 0.18rem #53D5FD, 0rem 0px 2.28rem 0.96rem #191DD5;
+        border-radius: 0.6rem;
+        width: 25vw;
+        min-height: 37.38rem;
+        max-height: fit-content;
+        padding: 1.8rem;
+        background-image: url('./static/Blue\ Neon.png');
+        background-size: cover;
+        display: flex;
+        align-items: center;
+        flex-direction: column;
+    }
+}
+
+@media only screen and (max-width: 475px) {
+    html{
+        font-size: 55%;
+    }
+    .Box{
+        border: 0.12rem solid #53D5FD;
+        box-shadow: 0px 0px 0.72rem 0.18rem #53D5FD, 0rem 0px 2.28rem 0.96rem #191DD5;
+        border-radius: 0.6rem;
+        width: 25.14rem;
+        height: 37.38rem;
+        padding: 1.8rem;
+        background-image: url('./static/Blue\ Neon.png');
+        background-size: cover;
+        display: flex;
+        align-items: center;
+        flex-direction: column;
+    }
+    .BoxContainer{
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        gap: 2rem;
+    }
+    .BoxContent{
+        font-family: 'Jura';
+        font-style: normal;
+        font-weight: 700;
+        font-size: 1.92rem;
+        /* or 117% */
+    
+        text-align: center;
+        font-feature-settings: 'salt' on, 'liga' off;
+    
+        color: #FFFFFF;
+    }
+}

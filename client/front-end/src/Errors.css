@@ -1,0 +1,10 @@
+.errormsg{
+    font-family: 'Jura';
+font-style: normal;
+font-weight: 700;
+font-size: 35px;
+text-align: center;
+text-transform: uppercase;
+color:#FFAAB6;
+text-shadow: 0px 0px 12px #CE1532, 0px 0px 38px #F51919;
+}

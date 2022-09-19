@@ -1,0 +1,31 @@
+{
+  "files": {
+    "main.css": "./static/css/main.4cf5769d.css",
+    "main.js": "./static/js/main.c868edda.js",
+    "static/media/Flames.png": "./static/media/Flames.d221bdcd12d7809e94e3.png",
+    "static/media/Approve Token Button GIF.gif": "./static/media/Approve Token Button GIF.65461f4eb22de550150f.gif",
+    "static/media/Buy Ticket Button GIF.gif": "./static/media/Buy Ticket Button GIF.3f13d36230cc4ef6039f.gif",
+    "static/media/Diablo.png": "./static/media/Diablo.caa0df32ae50fe52ce8d.png",
+    "static/media/Tron Link btn.png": "./static/media/Tron Link btn.9596f8b4228eb85fe735.png",
+    "static/media/Wallet Connect btn.png": "./static/media/Wallet Connect btn.9549dc876444a85557b3.png",
+    "static/media/Approve Token Button BLUE.png": "./static/media/Approve Token Button BLUE.df867a89c6b5c3adb006.png",
+    "static/media/Blue Neon.png": "./static/media/Blue Neon.555e7cc8f743645f884d.png",
+    "static/media/Buy Ticket Button PINK.png": "./static/media/Buy Ticket Button PINK.e040fb75f7ba42aa4e00.png",
+    "static/media/Buy Ticket Button BLUE.png": "./static/media/Buy Ticket Button BLUE.1670d5775c1ab0e02c99.png",
+    "static/media/Dollar.png": "./static/media/Dollar.9976c353c3d8dbda1faf.png",
+    "static/media/Metamask btn.png": "./static/media/Metamask btn.c4453eb7ef3f40ebfdef.png",
+    "static/media/Bell.png": "./static/media/Bell.fa3776f50e54818c5627.png",
+    "static/media/Lock.png": "./static/media/Lock.8096b1549d8c284321cb.png",
+    "static/media/JuraMedium.ttf": "./static/media/JuraMedium.c4be341c3bba404ef161.ttf",
+    "static/media/JockeyOne-Regular.ttf": "./static/media/JockeyOne-Regular.05d8ac0992bf09748fb2.ttf",
+    "static/media/Header Logo.png": "./static/media/Header Logo.9b5bbf68c2e87aa67631.png",
+    "static/media/Mini Logo.png": "./static/media/Mini Logo.92bee954ffd37abc60d9.png",
+    "index.html": "./index.html",
+    "main.4cf5769d.css.map": "./static/css/main.4cf5769d.css.map",
+    "main.c868edda.js.map": "./static/js/main.c868edda.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.4cf5769d.css",
+    "static/js/main.c868edda.js"
+  ]
+}
