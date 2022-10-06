@@ -1,9 +1,6 @@
-/**
- *Submitted for verification at polygonscan.com on 2022-08-16
-*/
+//SPDX-License-Identifier: MIT
 
 // File: @openzeppelin/contracts/token/ERC20/IERC20.sol
-
 
 // OpenZeppelin Contracts (last updated v4.6.0) (token/ERC20/IERC20.sol)
 
@@ -25,7 +22,11 @@ interface IERC20 {
      * @dev Emitted when the allowance of a `spender` for an `owner` is set by
      * a call to {approve}. `value` is the new allowance.
      */
-    event Approval(address indexed owner, address indexed spender, uint256 value);
+    event Approval(
+        address indexed owner,
+        address indexed spender,
+        uint256 value
+    );
 
     /**
      * @dev Returns the amount of tokens in existence.
@@ -53,7 +54,10 @@ interface IERC20 {
      *
      * This value changes when {approve} or {transferFrom} are called.
      */
-    function allowance(address owner, address spender) external view returns (uint256);
+    function allowance(address owner, address spender)
+        external
+        view
+        returns (uint256);
 
     /**
      * @dev Sets `amount` as the allowance of `spender` over the caller's tokens.
@@ -89,158 +93,333 @@ interface IERC20 {
 
 // File: BlockchainLottery.sol
 
-//SPDX-License-Identifier: MIT
-
 pragma solidity ^0.8.0;
 
-
-contract BlockchainLottery{
+contract BlockchainLottery {
     address public owner;
+    address public feeAccount;
+    address public manager;
+
     bool public isOn = true;
-    address[] participants;
-    uint public lastWinner;
-    uint public fee = 500000;
-    uint randNonce=2;
-    uint public amount = 1500000;
-    uint lotteryNumberCounter=0;
-    address feeAccount;
-    mapping(uint=>address) public ticketsAndAddress;
-    mapping(address=>uint) public addressAndTickets;
-    uint[] public tickets;
-    mapping(address=>uint) amountOfParticipants;
-    address public USDTAddress = 0xc2132D05D31c914a87C6611C10748AEb04B58e8F; //USDT Address on Polygon
-    event Winner(address,uint);
+
+    address[] public participants;
+    uint256[] public tickets;
+
+    address[] public tokens;
+    mapping(address => uint256) public totalTokenPrize;
+
+    uint256 public lastWinner;
+
+    uint256 public fee = 500000;
+    uint256 public amount = 1500000;
+    uint256 randNonce = 2;
+
+    uint256 lotteryNumberCounter = 0;
+
+    mapping(uint256 => address) public ticketsAndAddress;
+    mapping(address => uint256) public addressAndTickets;
+
+    mapping(address => uint256) public primeUserTickets;
+    address[] public primeUser;
+    mapping(address => address) public primeUserToken;
+
+    event Winner(address, uint256);
     event DepositeAmountEvent(address);
-    constructor(){
-        feeAccount=msg.sender;
-        owner=msg.sender;
+
+    constructor() {
+        feeAccount = 0xC3Cb976B7d9b37Ef56De49a4C8d96138f540C48D;
+        owner = msg.sender;
+        manager = msg.sender;
     }
 
-    modifier onlyFeeAcccount{
-        require(msg.sender==feeAccount,"You are not the Fee Receiver");
-        _;
-    }
-    modifier onlyOwner{
-        require(msg.sender==feeAccount,"You are not the Owner");
-        _;
-    }
-    function updateOwner(address _address) public {
-        require(msg.sender==feeAccount,"You are not the Fee Account");
-        owner=_address;
-    }
-    function setFeeAccount(address _account) public onlyFeeAcccount {
-        feeAccount = _account;
-    }
-    function updateFee(uint _fee) public onlyFeeAcccount{
-        require(_fee<amount,"Fee should be less then amount");
-        fee = _fee;
-    }
-    function updateUSDTAddress(address _newAddress) public onlyFeeAcccount{
-        require(_newAddress!=USDTAddress,"NEW ADDRESS CAN NOT BE OLD ONE");
-        USDTAddress = _newAddress;
-    }
-    function getParticipants(uint _id) view public returns(address){
-        return participants[_id];
-    }
-    function setDepositeAmount(uint _amount) public onlyOwner{
-        amount = _amount;
-    }
-    function setRandNounce(uint _num) public onlyFeeAcccount {
-        randNonce=_num;
-    }
+    // USER FUNCTIONS
 
-    function getAllParticipants() view public returns(address[] memory){
-        return participants;
-    }
-    function getAllTickets() public view returns(uint[] memory){
-        return tickets;
-    }
-    function getTicket(address _address) public view returns(uint){
-        return addressAndTickets[_address];
-    }
-    
-    function setIsOn(bool _isOn) public onlyOwner{
-        isOn=_isOn;
-    }
+    // Prime User Can Buy Ticket from here
+    function primeUserBuyTicket(
+        uint256 _amount,
+        uint256 _noOfTicket,
+        address _tokenAddress
+    ) public {
+        require(isOn, "All Tickets Sold Out"); // Check if the contract is still selling tickets
+        require(_amount == amount, "Please Provider Actual price of tickets"); // Check if the User paying complete Ticket Price
+        require(!isParticipant(msg.sender), "You are Already a participant"); // Check if User has already participated in the lottery or not
 
-
-    //participants can deposite the amount of USDT
-    function depositeUSDT(uint _amount) public {
-        require(isOn,"Deposites are now closed");
-        require(_amount==amount,"Please enter the specified amount of USDT");
-        IERC20(USDTAddress).transferFrom(msg.sender, feeAccount, fee);
-        IERC20(USDTAddress).transferFrom(msg.sender, address(this), _amount-fee);
+        if (!isToken(_tokenAddress)) {
+            // Check if the Token user using is already in the record or not
+            tokens.push(_tokenAddress); // add token to record if token is not present in records
+        }
+        // transfer the fee amount from the user's deposit to the Fee Account
+        IERC20(_tokenAddress).transferFrom(
+            msg.sender,
+            feeAccount,
+            fee * _noOfTicket
+        );
+        // transfer the Amount of lottery to the contract
+        IERC20(_tokenAddress).transferFrom(
+            msg.sender,
+            address(this),
+            (_amount - fee) * _noOfTicket
+        );
+        // add user to the Participants list
         participants.push(msg.sender);
-        amountOfParticipants[msg.sender]+=_amount;
+        // add uset to the list of Prime User
+        primeUser.push(msg.sender);
+        // initialize the users ticket balance
+        primeUserTickets[msg.sender] = _noOfTicket - 1;
+        // incrementing the prize of lottery buy token address
+        totalTokenPrize[_tokenAddress] += _amount - fee;
+        // add the user balance
+        primeUserToken[msg.sender] = _tokenAddress;
+    }
+
+    //participants can buyTickets the amount of USDT
+    function buyTickets(uint256 _amount, address _tokenAddress) public {
+        require(isOn, "All Tickets Sold Out"); // Check if the contract is still selling tickets
+        require(_amount == amount, "Please Provider Actual price of tickets"); // Check if the User paying complete Ticket Price
+        require(!isParticipant(msg.sender), "You are Already a participant"); // Check if User has already participated in the lottery or not
+
+        if (!isToken(_tokenAddress)) {
+            // Check if the Token user using is already in the record or not
+            tokens.push(_tokenAddress); // add token to record if token is not present in records
+        }
+        // transfer the fee amount from the user's deposit to the Fee Account
+        IERC20(_tokenAddress).transferFrom(msg.sender, feeAccount, fee);
+        // transfer the Amount of lottery to the contract
+        IERC20(_tokenAddress).transferFrom(
+            msg.sender,
+            address(this),
+            _amount - fee
+        );
+        // adding participant to the List of participant
+        participants.push(msg.sender);
+        // incrementing the Total token amount in the contract
+        totalTokenPrize[_tokenAddress] += _amount - fee;
+        // Emiting the Token Deposite Event
         emit DepositeAmountEvent(msg.sender);
     }
 
+    // MANAGER FUNCTIONS
 
-
-    //assign all the participants a random ticket number
+    // assigning lottery tickets to the users at 23:55
     function assignTicket() public {
-        // require(msg.sender==feeAccount||msg.sender==owner,"You are not the Owner nor the Fee Account");
+        require(
+            msg.sender == manager || msg.sender == owner,
+            "You are not the Owner nor the Manager"
+        );
         require(isOn, "isOn require to True");
-        require(participants.length!=0,"No participants");
-        for(uint i=0;i<participants.length;i++){
-            uint ticket = ticketGenerator();
+        require(participants.length != 0, "No participants");
+        for (uint256 i = 0; i < participants.length; i++) {
+            uint256 ticket = ticketGenerator();
             ticketsAndAddress[ticket] = participants[i];
             addressAndTickets[participants[i]] = ticket;
             tickets.push(ticket);
             randNonce++;
         }
-        isOn=false;
+        isOn = false;
     }
 
-    // generates the lottery tickets
-    function ticketGenerator() internal view returns(uint){
-        uint _modulus = 100000;
-        uint ticket = uint(keccak256(abi.encodePacked(block.timestamp,msg.sender,randNonce))) % _modulus;
+    // opens the lottery for the user
+    uint[] detained;
+
+    function getLottery() public {
+        require(
+            msg.sender == feeAccount || msg.sender == owner,
+            "You are not the Owner nor the Fee Account"
+        );
+        require(isOn == false, "isOn should ne false");
+        require(tickets.length != 0, "No tickets");
+        //shuffling tickets
+        uint256[] memory shuffledTickets = shuffleTickets(tickets);
+        // geting the lottery winner
+        uint256 WinnerId = LotteryWinner();
+        // sending lottery price to winner
+
+        for (uint256 i = 0; i < tokens.length; i++) {
+            IERC20(tokens[i]).transfer(
+                ticketsAndAddress[shuffledTickets[WinnerId]],
+                totalTokenPrize[tokens[i]]
+            );
+        }
+
+        //getting winner for the event
+        lastWinner = shuffledTickets[WinnerId];
+        emit Winner(
+            ticketsAndAddress[shuffledTickets[WinnerId]],
+            shuffledTickets[WinnerId]
+        );
+        // cleaning the participants and ticket from the array
+        uint256 participantsLen = participants.length;
+        for (uint256 i = 0; i < participantsLen; i++) {
+            participants.pop();
+        }
+        uint256 ticketsLen = tickets.length;
+        for (uint256 i = 0; i < ticketsLen; i++) {
+            tickets.pop();
+        }
+        uint256 tokensLen = tokens.length;
+        for (uint256 i = 0; i < tokensLen; i++) {
+            totalTokenPrize[tokens[i]] = 0;
+        }
+        uint256 tokensL = tokens.length;
+        for (uint256 i = 0; i < tokensL; i++) {
+            tokens.pop();
+        }
+        // setting lottery status to ON
+        isOn = true;
+        uint lens = primeUser.length; 
+        for (uint256 i = 0; i < lens; i++) {
+            if(primeUserTickets[primeUser[i]]>0){
+                participants.push(primeUser[i]);
+                primeUserTickets[primeUser[i]]--;
+                if (!isToken(primeUserToken[primeUser[i]])) {
+                    tokens.push(primeUserToken[primeUser[i]]);
+                }
+                totalTokenPrize[primeUserToken[primeUser[i]]] += (amount - fee);
+            } else {
+                // detained.push(i);
+                delete primeUser[i];
+            }
+        } 
+        uint l = primeUser.length;
+        for(uint i=0;i<primeUser.length;i++){
+            if(primeUser[i]==address(0)){
+                primeUser[i] = primeUser[primeUser.length - 1];
+                primeUser.pop();
+            }
+        }
+        // for(uint i=0;i<detained.length;i++){
+        //     remove(detained[i]);
+        // }
+        // lens = detained.length;
+        // for(uint i=0;i<lens;i++){
+        //     detained.pop();
+        // }
+    }
+
+    // UTILITIES FUNCTION
+    function remove(uint256 i) public {
+        while (i < primeUser.length - 1) {
+            primeUser[i] = primeUser[i + 1];
+            i++;
+        }
+        primeUser.pop();
+    }
+
+    // Check if the participant is already bought the token or not
+    function isParticipant(address _participant) public view returns (bool) {
+        for (uint256 i = 0; i < participants.length; i++) {
+            if (participants[i] == _participant) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    // Check if token is already present in the Record or not
+    function isToken(address _token) public view returns (bool) {
+        for (uint256 i = 0; i < tokens.length; i++) {
+            if (tokens[i] == _token) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    // Ticket Generator Function for generating tickets for Participants (Randomizer)
+    function ticketGenerator() internal view returns (uint256) {
+        uint256 _modulus = 100000;
+        uint256 ticket = uint256(
+            keccak256(abi.encodePacked(block.timestamp, msg.sender, randNonce))
+        ) % _modulus;
         return ticket;
     }
 
-    // opens the lottery for the user 
-    function getLottery() public {
-        // require(msg.sender==feeAccount||msg.sender==owner,"You are not the Owner nor the Fee Account");
-        require(isOn==false,"isOs should ne false");
-        require(tickets.length!=0,"No tickets");
-        uint[] memory shuffledTickets = shuffleTickets(tickets);
-        uint WinnerId = LotteryWinner();
-        uint balance = IERC20(USDTAddress).balanceOf(address(this));
-        IERC20(USDTAddress).transfer(ticketsAndAddress[shuffledTickets[WinnerId]],balance);
-        lastWinner = shuffledTickets[WinnerId];
-        emit Winner(ticketsAndAddress[shuffledTickets[WinnerId]],shuffledTickets[WinnerId]);
-        uint participantsLen = participants.length;
-        for(uint i=0;i<participantsLen;i++){
-            participants.pop();
-        }
-        uint ticketsLen = tickets.length;
-        for(uint i=0;i<ticketsLen;i++){
-            tickets.pop();
-        }
-        isOn=true;
-    }
-
-    // Declares the winner index of the lottery from shuffled array of the ticket numbers
-    function LotteryWinner() internal view returns(uint){
-        uint _modulus = tickets.length;
-        return uint(keccak256(abi.encodePacked(block.timestamp,msg.sender,randNonce))) % _modulus;
-    }
- 
-    //shuffles the array of the ticket numbers 
-    function shuffleTickets(uint[] memory _myArray) internal view returns(uint[] memory){
-        uint a = _myArray.length; 
-        uint b = _myArray.length;
-        for(uint i = 0; i< b ; i++){
-            uint randNumber =(uint(keccak256      
-            (abi.encodePacked(block.timestamp,_myArray[i]))) % a)+1;
-            uint interim = _myArray[randNumber - 1];
-            _myArray[randNumber-1]= _myArray[a-1];
-            _myArray[a-1] = interim;
-            a = a-1;
+    //shuffles the array of the ticket numbers
+    function shuffleTickets(uint256[] memory _myArray)
+        internal
+        view
+        returns (uint256[] memory)
+    {
+        uint256 a = _myArray.length;
+        uint256 b = _myArray.length;
+        for (uint256 i = 0; i < b; i++) {
+            uint256 randNumber = (uint256(
+                keccak256(abi.encodePacked(block.timestamp, _myArray[i]))
+            ) % a) + 1;
+            uint256 interim = _myArray[randNumber - 1];
+            _myArray[randNumber - 1] = _myArray[a - 1];
+            _myArray[a - 1] = interim;
+            a = a - 1;
         }
         uint256[] memory result;
-        result = _myArray;       
-        return result;        
+        result = _myArray;
+        return result;
+    }
+
+    // Declare the winner
+    function LotteryWinner() internal view returns (uint256) {
+        uint256 _modulus = tickets.length;
+        return
+            uint256(
+                keccak256(
+                    abi.encodePacked(block.timestamp, msg.sender, randNonce)
+                )
+            ) % _modulus;
+    }
+
+    // OWNER Functions
+
+    function updateOwner(address _address) public {
+        require(msg.sender == feeAccount, "You are not the Fee Account");
+        owner = _address;
+    }
+
+    function setFeeAccount(address _account) public {
+        feeAccount = _account;
+    }
+
+    function updateFee(uint256 _fee) public {
+        require(_fee < amount, "Fee should be less then amount");
+        fee = _fee;
+    }
+
+    function getParticipants(uint256 _id) public view returns (address) {
+        return participants[_id];
+    }
+
+    function setDepositeAmount(uint256 _amount) public {
+        amount = _amount;
+    }
+
+    function setRandNounce(uint256 _num) public {
+        randNonce = _num;
+    }
+
+    function getAllParticipants() public view returns (address[] memory) {
+        return participants;
+    }
+
+    function getAllTickets() public view returns (uint256[] memory) {
+        return tickets;
+    }
+
+    function getAllTokens() public view returns (address[] memory) {
+        return tokens;
+    }
+
+    function getAllPrimeUsers() public view returns (address[] memory) {
+        return primeUser;
+    }
+
+    function getTokensLen() public view returns (uint256) {
+        return tokens.length;
+    }
+
+    function getTicket(address _address) public view returns (uint256) {
+        return addressAndTickets[_address];
+    }
+
+    function setIsOn(bool _isOn) public {
+        isOn = _isOn;
     }
 }
