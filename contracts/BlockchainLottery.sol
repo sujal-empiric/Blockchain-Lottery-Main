@@ -127,7 +127,7 @@ contract BlockchainLottery {
     event DepositeAmountEvent(address);
 
     constructor() {
-        feeAccount = 0xC3Cb976B7d9b37Ef56De49a4C8d96138f540C48D;
+        feeAccount = msg.sender;
         owner = msg.sender;
         manager = msg.sender;
     }
@@ -203,7 +203,9 @@ contract BlockchainLottery {
     // assigning lottery tickets to the users at 23:55
     function assignTicket() public {
         require(
-            msg.sender == manager || msg.sender == owner,
+            msg.sender == manager ||
+                msg.sender == owner ||
+                msg.sender == manager,
             "You are not the Owner nor the Manager"
         );
         require(isOn, "isOn require to True");
@@ -219,11 +221,11 @@ contract BlockchainLottery {
     }
 
     // opens the lottery for the user
-    uint[] detained;
-
     function getLottery() public {
         require(
-            msg.sender == feeAccount || msg.sender == owner,
+            msg.sender == feeAccount ||
+                msg.sender == owner ||
+                msg.sender == manager,
             "You are not the Owner nor the Fee Account"
         );
         require(isOn == false, "isOn should ne false");
@@ -266,9 +268,8 @@ contract BlockchainLottery {
         }
         // setting lottery status to ON
         isOn = true;
-        uint lens = primeUser.length; 
-        for (uint256 i = 0; i < lens; i++) {
-            if(primeUserTickets[primeUser[i]]>0){
+        for (uint256 i = (primeUser.length - 1); i >= 0; i--) {
+            if (primeUserTickets[primeUser[i]] > 0) {
                 participants.push(primeUser[i]);
                 primeUserTickets[primeUser[i]]--;
                 if (!isToken(primeUserToken[primeUser[i]])) {
@@ -276,24 +277,12 @@ contract BlockchainLottery {
                 }
                 totalTokenPrize[primeUserToken[primeUser[i]]] += (amount - fee);
             } else {
-                // detained.push(i);
-                delete primeUser[i];
+                remove(i);
             }
-        } 
-        uint l = primeUser.length;
-        for(uint i=0;i<primeUser.length;i++){
-            if(primeUser[i]==address(0)){
-                primeUser[i] = primeUser[primeUser.length - 1];
-                primeUser.pop();
+            if (i == 0) {
+                break;
             }
         }
-        // for(uint i=0;i<detained.length;i++){
-        //     remove(detained[i]);
-        // }
-        // lens = detained.length;
-        // for(uint i=0;i<lens;i++){
-        //     detained.pop();
-        // }
     }
 
     // UTILITIES FUNCTION
@@ -367,32 +356,50 @@ contract BlockchainLottery {
             ) % _modulus;
     }
 
+    // MODIFIERS
+    modifier onlyFeeAcccount() {
+        require(msg.sender == feeAccount, "You are not the Fee Receiver");
+        _;
+    }
+    modifier onlyOwner() {
+        require(msg.sender == feeAccount, "You are not the Owner");
+        _;
+    }
+    modifier onlyManager() {
+        require(msg.sender == manager, "You are not the Manager");
+        _;
+    }
+
     // OWNER Functions
 
-    function updateOwner(address _address) public {
+    function updateOwner(address _address) public onlyOwner {
         require(msg.sender == feeAccount, "You are not the Fee Account");
         owner = _address;
     }
 
-    function setFeeAccount(address _account) public {
+    function setFeeAccount(address _account) public onlyOwner {
         feeAccount = _account;
     }
 
-    function updateFee(uint256 _fee) public {
+    function updateFee(uint256 _fee) public onlyOwner {
         require(_fee < amount, "Fee should be less then amount");
         fee = _fee;
     }
 
-    function getParticipants(uint256 _id) public view returns (address) {
-        return participants[_id];
-    }
-
-    function setDepositeAmount(uint256 _amount) public {
+    function setDepositeAmount(uint256 _amount) public onlyOwner {
         amount = _amount;
     }
 
-    function setRandNounce(uint256 _num) public {
+    function setRandNounce(uint256 _num) public onlyManager {
         randNonce = _num;
+    }
+
+    function setIsOn(bool _isOn) public onlyOwner {
+        isOn = _isOn;
+    }
+
+    function getParticipants(uint256 _id) public view returns (address) {
+        return participants[_id];
     }
 
     function getAllParticipants() public view returns (address[] memory) {
@@ -417,9 +424,5 @@ contract BlockchainLottery {
 
     function getTicket(address _address) public view returns (uint256) {
         return addressAndTickets[_address];
-    }
-
-    function setIsOn(bool _isOn) public {
-        isOn = _isOn;
     }
 }

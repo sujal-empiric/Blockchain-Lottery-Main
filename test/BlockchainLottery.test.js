@@ -26,11 +26,13 @@ contract("BlockchainLottery", (accounts) => {
 
 
     it("Check if All Prime users are getting the lottery", async ()=>{
-        for(var i=0;i<5;i++){
-            await this.blockchainlottery.primeUserBuyTicket(1500000,5,this.usdt.address,{from:accounts[i]})
-        }
-        for(var i=5;i<10;i++){
-            await this.blockchainlottery.primeUserBuyTicket(1500000,10,this.usdc.address,{from:accounts[i]})
+        for(var i=0;i<10;i++){
+            if(i%2==0){
+                await this.blockchainlottery.primeUserBuyTicket(1500000,10,this.usdt.address,{from:accounts[i]})
+            }else{
+                await this.blockchainlottery.primeUserBuyTicket(1500000,10,this.usdc.address,{from:accounts[i]})
+            }
+            
         }
         for(i=0;i<10;i++){
             console.log("Iteration Number",i+1)
@@ -43,11 +45,37 @@ contract("BlockchainLottery", (accounts) => {
             const participants = await this.blockchainlottery.getAllParticipants()
             console.log("PARTICIPANTS")
             console.log(participants)
+            participants.map(async (acc)=>{
+                const tic =  await this.blockchainlottery.primeUserTickets(acc)
+                console.log(acc+" : "+tic)
+            })
             await this.blockchainlottery.assignTicket({from:accounts[0]})
-            await this.blockchainlottery.getLottery({from:accounts[0], gasLimit:3000000})
+            var tx = await this.blockchainlottery.getLottery({from:accounts[0], gasLimit:3000000})
+            console.log(tx.receipt.gasUsed)
             console.log("#############################################")
         }
-        const primeUser = await this.blockchainlottery.getAllPrimeUsers()
+        var primeUser = await this.blockchainlottery.getAllPrimeUsers()
+        console.log("PRIME USERS")
+        console.log(primeUser)
+        var tokens = await this.blockchainlottery.getAllTokens()
+        console.log("TOKENS")
+        console.log(tokens)
+        var participants = await this.blockchainlottery.getAllParticipants()
+        console.log("PARTICIPANTS")
+        console.log(participants)
+
+
+        for(var i=0;i<10;i++){
+            if(i%2==0){
+                await this.blockchainlottery.primeUserBuyTicket(1500000,5,this.usdt.address,{from:accounts[i]})
+            }else{
+                await this.blockchainlottery.primeUserBuyTicket(1500000,10,this.usdc.address,{from:accounts[i]})
+            }
+            
+        }
+        for(i=0;i<10;i++){
+            console.log("Iteration Number",i+1)
+            const primeUser = await this.blockchainlottery.getAllPrimeUsers()
             console.log("PRIME USERS")
             console.log(primeUser)
             const tokens = await this.blockchainlottery.getAllTokens()
@@ -56,6 +84,60 @@ contract("BlockchainLottery", (accounts) => {
             const participants = await this.blockchainlottery.getAllParticipants()
             console.log("PARTICIPANTS")
             console.log(participants)
+            participants.map(async (acc)=>{
+                const tic =  await this.blockchainlottery.primeUserTickets(acc)
+                console.log(acc+" : "+tic)
+            })
+            await this.blockchainlottery.assignTicket({from:accounts[0]})
+            var tx = await this.blockchainlottery.getLottery({from:accounts[0], gasLimit:3000000})
+            console.log(tx.receipt.gasUsed)
+            console.log("#############################################")
+        }
+        var primeUser = await this.blockchainlottery.getAllPrimeUsers()
+        console.log("PRIME USERS")
+        console.log(primeUser)
+        var tokens = await this.blockchainlottery.getAllTokens()
+        console.log("TOKENS")
+        console.log(tokens)
+        var participants = await this.blockchainlottery.getAllParticipants()
+        console.log("PARTICIPANTS")
+        console.log(participants)
+
+        for(var i=0;i<5;i++){
+            await this.blockchainlottery.primeUserBuyTicket(1500000,i+4,this.usdt.address,{from:accounts[i]})
+        }
+        for(var i=5;i<10;i++){
+            await this.blockchainlottery.primeUserBuyTicket(1500000,i+3,this.usdc.address,{from:accounts[i]})
+        }
+        for(i=0;i<12;i++){
+            console.log("Iteration Number",i+1)
+            const primeUser = await this.blockchainlottery.getAllPrimeUsers()
+            console.log("PRIME USERS")
+            console.log(primeUser)
+            const tokens = await this.blockchainlottery.getAllTokens()
+            console.log("TOKENS")
+            console.log(tokens)
+            const participants = await this.blockchainlottery.getAllParticipants()
+            console.log("PARTICIPANTS")
+            console.log(participants)
+            participants.map(async (acc)=>{
+                const tic =  await this.blockchainlottery.primeUserTickets(acc)
+                console.log(acc+" : "+tic)
+            })
+            await this.blockchainlottery.assignTicket({from:accounts[0]})
+            var tx = await this.blockchainlottery.getLottery({from:accounts[0], gasLimit:3000000})
+            console.log(tx.receipt.gasUsed)
+            console.log("#############################################")
+        }
+        var primeUser = await this.blockchainlottery.getAllPrimeUsers()
+        console.log("PRIME USERS")
+        console.log(primeUser)
+        var tokens = await this.blockchainlottery.getAllTokens()
+        console.log("TOKENS")
+        console.log(tokens)
+        var participants = await this.blockchainlottery.getAllParticipants()
+        console.log("PARTICIPANTS")
+        console.log(participants)
     })
 
 
